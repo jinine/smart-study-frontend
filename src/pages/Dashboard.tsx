@@ -1,13 +1,13 @@
 import React from "react";
 import Header from "../components/Header";
-import TextEditor from "../components/TextEditor";
+import AITextEditor from "../components/AITextEditor";
 
 export default function Dashboard() {
   return (
     <div>
       <Header />
       <main className="p-24">
-        <TextEditor />
+        <AITextEditor />
       </main>
     </div>
   );
