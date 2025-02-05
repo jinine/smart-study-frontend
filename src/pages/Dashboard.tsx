@@ -2,8 +2,12 @@ import React from "react";
 import Header from "../components/Header";
 import AITextEditor from "../components/AITextEditor";
 import Chat from "../components/Chat";
+import { useEffect } from "react";
 
 export default function Dashboard() {
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+  }, []);
   return (
     <div>
       <Header />
