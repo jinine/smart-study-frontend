@@ -1,15 +1,33 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import axios from "axios";
+import { Link, useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 
 function Signup() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [username, setUsername] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [profilePictureUrl, setProfilePictureUrl] = useState("");
+  const navigate = useNavigate();
 
-  const handleSubmit = (e: any) => {
+  const handleSubmit = async (e: any) => {
     e.preventDefault();
-    // Add your signup logic here
-    console.log("Signup:", email, password);
+    try {
+      const response = await axios.post("http://localhost:8991/api/v1/user/create_user", {
+        username,
+        email,
+        first_name: firstName,
+        last_name: lastName,
+        clean_password: password,
+       _picture_url: profilePictureUrl,
+      });
+      console.log("Signup successful:", response.data);
+      navigate("/login");
+    } catch (error) {
+      console.error("Signup error:", error);
+    }
   };
 
   return (
@@ -21,6 +39,23 @@ function Signup() {
           onSubmit={handleSubmit}
         >
           <h2 className="text-3xl font-semibold text-white mb-6">Sign Up</h2>
+          <div className="mb-6">
+            <label
+              className="block text-sm font-medium text-gray-300"
+              htmlFor="username"
+            >
+              Username
+            </label>
+            <input
+              type="text"
+              id="username"
+              className="w-full p-3 border border-gray-600 rounded-md bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              required
+              placeholder="Enter your username"
+            />
+          </div>
           <div className="mb-6">
             <label
               className="block text-sm font-medium text-gray-300"
@@ -41,6 +76,40 @@ function Signup() {
           <div className="mb-6">
             <label
               className="block text-sm font-medium text-gray-300"
+              htmlFor="firstName"
+            >
+              First Name
+            </label>
+            <input
+              type="text"
+              id="firstName"
+              className="w-full p-3 border border-gray-600 rounded-md bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+              required
+              placeholder="Enter your first name"
+            />
+          </div>
+          <div className="mb-6">
+            <label
+              className="block text-sm font-medium text-gray-300"
+              htmlFor="lastName"
+            >
+              Last Name
+            </label>
+            <input
+              type="text"
+              id="lastName"
+              className="w-full p-3 border border-gray-600 rounded-md bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+              required
+              placeholder="Enter your last name"
+            />
+          </div>
+          <div className="mb-6">
+            <label
+              className="block text-sm font-medium text-gray-300"
               htmlFor="password"
             >
               Password
@@ -53,6 +122,22 @@ function Signup() {
               onChange={(e) => setPassword(e.target.value)}
               required
               placeholder="Enter your password"
+            />
+          </div>
+          <div className="mb-6">
+            <label
+              className="block text-sm font-medium text-gray-300"
+              htmlFor="profilePictureUrl"
+            >
+              Profile Picture URL
+            </label>
+            <input
+              type="text"
+              id="profilePictureUrl"
+              className="w-full p-3 border border-gray-600 rounded-md bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={profilePictureUrl}
+              onChange={(e) => setProfilePictureUrl(e.target.value)}
+              placeholder="Enter your profile picture URL"
             />
           </div>
           <button
