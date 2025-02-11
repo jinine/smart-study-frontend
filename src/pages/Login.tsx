@@ -16,6 +16,7 @@ function Login() {
       });
       console.log("Login successful:", response.data);
       localStorage.setItem("token", response.data.token);
+      localStorage.setItem("user", response.data.email);
       navigate("/dashboard");
     } catch (error) {
       console.error("Login error:", error);
