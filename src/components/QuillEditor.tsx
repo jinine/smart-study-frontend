@@ -2,8 +2,12 @@ import { useState } from "react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css"; // Import Quill styles
 
-export default function QuillEditor() {
-    const [value, setValue] = useState("");
+type Params = {
+    value: any,
+    setValue: any
+};
+
+export default function QuillEditor({value, setValue}: Params) {
 
     return (
         <div className="w-full p-4 bg-white rounded-lg">

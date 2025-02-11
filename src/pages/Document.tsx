@@ -1,28 +1,53 @@
-import Header from "../components/Header";
-import { Link, useNavigate } from "react-router-dom";
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
+import Header from "../components/Header";
 import QuillEditor from "../components/QuillEditor";
 
-
 export default function Dashboard() {
-  const isLoggedIn = !!localStorage.getItem("token");
-  const navigate = useNavigate();
-  const user = localStorage.getItem("user")
+    const { uuid } = useParams();
+    const navigate = useNavigate();
+    const [document, setDocument] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
+    const [value, setValue] = useState("");
 
-  useEffect(() => {
-    if (!isLoggedIn) {
-      navigate("/")
-    }
-  });
+    useEffect(() => {
+        if (!localStorage.getItem("token")) {
+            navigate("/");
+        }
+    }, []);
 
-  
-  return (
-    <div>
-      <Header />
-      <main className="p-8 lg:flex">
-        <QuillEditor />
-      </main>
-    </div>
-  );
+    useEffect(() => {
+        if (!uuid) return;
+
+        setLoading(true);
+        axios.get(`http://localhost:8991/api/v1/document/${uuid}`)
+            .then((response) => {
+                setDocument(response.data);
+                setError("");
+                setValue(document.document.content);
+                setLoading(false);
+            })
+            .catch((err) => {
+                console.error("Error fetching document:", err);
+                setError("Document not found.");
+            })
+            .finally(() => setLoading(false));
+    }, [uuid]);
+
+    return (
+        <div>
+            <Header />
+            <main className="p-8 lg:flex">
+                {loading ? (
+                    <p>Loading document...</p>
+                ) : error ? (
+                    <p className="text-red-600">{error}</p>
+                ) : (
+                    <QuillEditor value={value} setValue={setValue} />
+                )}
+            </main>
+        </div>
+    );
 }
