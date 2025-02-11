@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { LockClosed20Regular, Globe20Regular, DocumentText20Regular } from "@fluentui/react-icons";
+import { Link } from "react-router-dom";
 
 interface Document {
   uuid: string;
@@ -39,7 +40,8 @@ export default function DocumentList() {
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
         {documents.length > 0 ? (
           documents.map((doc) => (
-            <div
+            <Link
+              to={`/document/${doc.uuid}`}
               key={doc.uuid}
               className="group flex flex-col p-4 border rounded-lg shadow hover:shadow-lg transition cursor-pointer bg-white overflow-hidden"
             >
@@ -69,7 +71,7 @@ export default function DocumentList() {
                   </span>
                 )}
               </div>
-            </div>
+            </Link>
           ))
         ) : (
           <div className="text-gray-500">No documents found.</div>

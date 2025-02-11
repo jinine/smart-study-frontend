@@ -21,15 +21,19 @@ export default function Header() {
               </Link>
             </>
           ) : (
-            <a
-              className="ml-4 text-white hover:text-blue-400 cursor-pointer"
-              onClick={() => {
-                localStorage.setItem("token", "");
-                navigate("/");
-              }}
-            >
-              Sign Out
-            </a>
+            <>
+              <Link to='/Dashboard'
+                className="ml-4 text-white hover:text-blue-400 cursor-pointer">Dashboard</Link>
+              <a
+                className="ml-4 text-white hover:text-blue-400 cursor-pointer"
+                onClick={() => {
+                  localStorage.setItem("token", "");
+                  navigate("/");
+                }}
+              >
+                Sign Out
+              </a></>
+
           )}
         </div>
       </div>
