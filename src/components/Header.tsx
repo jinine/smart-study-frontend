@@ -1,39 +1,46 @@
 import { Link, useNavigate } from "react-router-dom";
+import { PersonAdd24Regular, Person24Regular, SignOut24Regular, Home24Regular, ClipboardTask24Regular } from "@fluentui/react-icons";
 
 export default function Header() {
   const isLoggedIn = !!localStorage.getItem("token");
   const navigate = useNavigate();
 
   return (
-    <nav className="bg-gray-800 p-4">
+    <nav className="bg-gray-900 shadow-md p-4">
       <div className="max-w-7xl mx-auto flex justify-between items-center">
-        <Link to="/" className="text-2xl font-bold text-white hover:text-blue-400">
-          Smart Study Assistant
+        
+        {/* Logo / Home Link */}
+        <Link to="/" className="text-2xl font-bold text-white flex items-center hover:text-blue-400 transition">
+          <Home24Regular className="mr-2" /> Smart Study Assistant
         </Link>
-        <div>
+        
+        {/* Navigation Links */}
+        <div className="flex items-center space-x-6">
           {!isLoggedIn ? (
             <>
-              <Link to="/signup" className="ml-4 text-white hover:text-blue-400">
-                Sign Up
+              <Link to="/signup" className="flex items-center text-white hover:text-blue-400 transition">
+                <PersonAdd24Regular className="mr-1" /> Sign Up
               </Link>
-              <Link to="/login" className="ml-4 text-white hover:text-blue-400">
-                Login
+              <Link to="/login" className="flex items-center text-white hover:text-blue-400 transition">
+                <Person24Regular className="mr-1" /> Login
               </Link>
             </>
           ) : (
             <>
-              <Link to='/Dashboard'
-                className="ml-4 text-white hover:text-blue-400 cursor-pointer">Dashboard</Link>
-              <a
-                className="ml-4 text-white hover:text-blue-400 cursor-pointer"
+              <Link to="/dashboard" className="flex items-center text-white hover:text-blue-400 transition">
+                <ClipboardTask24Regular className="mr-1" /> Dashboard
+              </Link>
+              <button
                 onClick={() => {
-                  localStorage.setItem("token", "");
+                  localStorage.removeItem("token");
+                  localStorage.removeItem("user");
                   navigate("/");
                 }}
+                className="flex items-center text-white hover:text-red-400 transition"
               >
-                Sign Out
-              </a></>
-
+                <SignOut24Regular className="mr-1" /> Sign Out
+              </button>
+            </>
           )}
         </div>
       </div>

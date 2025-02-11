@@ -16,7 +16,7 @@ export default function Dashboard() {
         if (!localStorage.getItem("token")) {
             navigate("/");
         }
-    }, []);
+    }, [navigate]);
 
     useEffect(() => {
         if (!uuid) return;
@@ -26,8 +26,6 @@ export default function Dashboard() {
             .then((response) => {
                 setDocument(response.data);
                 setError("");
-                setValue(document.document.content);
-                setLoading(false);
             })
             .catch((err) => {
                 console.error("Error fetching document:", err);
@@ -35,6 +33,12 @@ export default function Dashboard() {
             })
             .finally(() => setLoading(false));
     }, [uuid]);
+
+    useEffect(() => {
+        if (document) {
+            setValue(document.document.content); // Ensure document is available before setting value
+        }
+    }, [document]);
 
     return (
         <div>
