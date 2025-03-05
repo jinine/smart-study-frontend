@@ -5,6 +5,10 @@ import Header from "../components/Header";
 import QuillEditor from "../components/QuillEditor";
 import Modal from "../components/Modal";
 import Share from "../components/share";
+import { io } from "socket.io-client"; 
+
+// Create a socket connection
+const socket = io(process.env.REACT_APP_BACKEND_URI);
 
 export default function Dashboard() {
     const { uuid } = useParams();
@@ -14,8 +18,8 @@ export default function Dashboard() {
     const [error, setError] = useState("");
     const [value, setValue] = useState("");
     const [share, setShare] = useState(false);
-    const [isSaving, setIsSaving] = useState(false); // Track if the document is autosaving
-    const [autoSaveEnabled, setAutoSaveEnabled] = useState(false); // Track if auto-save is enabled
+    const [isSaving, setIsSaving] = useState(false); 
+    const [autoSaveEnabled, setAutoSaveEnabled] = useState(false);
 
     useEffect(() => {
         if (!localStorage.getItem("token")) {
@@ -39,6 +43,26 @@ export default function Dashboard() {
             })
             .finally(() => setLoading(false));
     }, [uuid]);
+
+    useEffect(() => {
+        if (uuid) {
+            socket.on("document-update", (documentUuid, newContent) => {
+                if (documentUuid === uuid) {
+                    setValue(newContent);
+                }
+            });
+
+            return () => {
+                socket.off("document-update");
+            };
+        }
+    }, [uuid]);
+
+
+    const handleChange = (newContent: string) => {
+        setValue(newContent);
+        socket.emit("document-change", uuid, newContent);
+    };
 
     const handleSave = async () => {
         if (!document) return;
@@ -141,7 +165,7 @@ export default function Dashboard() {
                             <div className="text-green-500 text-center mb-4">Auto-saving...</div>
                         )}
 
-                        <QuillEditor value={value} setValue={setValue} />
+                        <QuillEditor value={value} setValue={handleChange} />
                     </>
                 )}
             </main>

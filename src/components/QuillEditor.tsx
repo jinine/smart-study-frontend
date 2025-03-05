@@ -1,7 +1,5 @@
-import { useState } from "react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
-import "react-quill/dist/quill.bubble.css"; // Optional: You can experiment with the 'bubble' theme for a cleaner look
 
 type Params = {
     value: any,

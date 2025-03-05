@@ -21,38 +21,49 @@ export default function DocumentList() {
 
   // Fetch documents based on user and documentListType
   useEffect(() => {
-    setLoading(true);
-    setError(null);
+    const fetchDocuments = () => {
+      setLoading(true);
+      setError(null);
 
-    if (documentListType === "personal" && user) {
-      axios
-        .post<{ documents: Document[] }>(
-          `${backendUri}/api/v1/authorized_documents`,
-          { users: user }
-        )
-        .then((res) => {
-          setDocuments(res.data.documents);
-          setLoading(false);
-        })
-        .catch(() => {
-          setError("Failed to fetch authorized documents.");
-          setLoading(false);
-        });
-    } else if (documentListType === "public") {
-      axios
-        .get<{ documents: Document[] }>(`${backendUri}/api/v1/documents`)
-        .then((res) => {
-          setDocuments(res.data.documents);
-          setLoading(false);
-        })
-        .catch(() => {
-          setError("Failed to fetch public documents.");
-          setLoading(false);
-        });
-    } else {
-      setError("No user found.");
-      setLoading(false);
-    }
+      if (documentListType === "personal" && user) {
+        axios
+          .post<{ documents: Document[] }>(
+            `${backendUri}/api/v1/authorized_documents`,
+            { users: user }
+          )
+          .then((res) => {
+            setDocuments(res.data.documents);
+            setLoading(false);
+          })
+          .catch(() => {
+            setError("Failed to fetch authorized documents.");
+            setLoading(false);
+          });
+      } else if (documentListType === "public") {
+        axios
+          .get<{ documents: Document[] }>(`${backendUri}/api/v1/documents`)
+          .then((res) => {
+            setDocuments(res.data.documents);
+            setLoading(false);
+          })
+          .catch(() => {
+            setError("Failed to fetch public documents.");
+            setLoading(false);
+          });
+      } else {
+        setError("No user found.");
+        setLoading(false);
+      }
+    };
+
+    // Initial fetch
+    fetchDocuments();
+
+    // Set an interval to refresh documents every 30 seconds
+    const intervalId = setInterval(fetchDocuments, 30000); // 30 seconds
+
+    // Cleanup the interval on component unmount
+    return () => clearInterval(intervalId);
   }, [documentListType, user]);
 
   if (loading) return <div className="flex justify-center items-center h-screen text-gray-500">Loading...</div>;
