@@ -5,7 +5,7 @@ import Header from "../components/Header";
 import QuillEditor from "../components/QuillEditor";
 import Modal from "../components/Modal";
 import Share from "../components/share";
-import { io } from "socket.io-client"; 
+import { io } from "socket.io-client";
 
 // Create a socket connection
 const socket = io(process.env.REACT_APP_BACKEND_URI);
@@ -18,7 +18,7 @@ export default function Dashboard() {
     const [error, setError] = useState("");
     const [value, setValue] = useState("");
     const [share, setShare] = useState(false);
-    const [isSaving, setIsSaving] = useState(false); 
+    const [isSaving, setIsSaving] = useState(false);
     const [autoSaveEnabled, setAutoSaveEnabled] = useState(false);
 
     useEffect(() => {
@@ -120,6 +120,35 @@ export default function Dashboard() {
         );
     };
 
+
+    const generateCueCards = async () => {
+        if (!value) return alert("Document is empty!");
+
+        console.log(value)
+        try {
+            const response = await axios.post(
+                `${process.env.REACT_APP_BACKEND_URI}/api/v1/generate-cue-cards`, 
+                { text: value }
+            );
+    
+            const cueCards = response.data;
+            console.log("Generated Cue Cards:", cueCards);
+    
+            // const jsonData = JSON.stringify(cueCards, null, 2);
+            // const blob = new Blob([jsonData], { type: "application/json" });
+            // const url = URL.createObjectURL(blob);
+            // const a = document.createElement("a");
+            // a.href = url;
+            // a.download = "cue_cards.json";
+            // a.click();
+            // URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error("Error generating cue cards:", error);
+            alert("Failed to generate cue cards.");
+        }
+    };
+    
+
     return (
         <div>
             <Header />
@@ -145,6 +174,12 @@ export default function Dashboard() {
                                 className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
                             >
                                 Delete
+                            </button>
+                            <button
+                                onClick={generateCueCards}
+                                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+                            >
+                                Generate Cue Cards
                             </button>
                             <button onClick={() => setShare(true)} className="">
                                 Share
