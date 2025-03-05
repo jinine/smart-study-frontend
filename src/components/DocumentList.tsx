@@ -15,19 +15,32 @@ export default function DocumentList() {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const user = localStorage.getItem("user");
+  const backendUri = process.env.REACT_APP_BACKEND_URI;
+  
 
   useEffect(() => {
-    axios
-      .get<{ documents: Document[] }>("http://localhost:8991/api/v1/documents")
-      .then((res) => {
-        setDocuments(res.data.documents);
-        setLoading(false);
-      })
-      .catch(() => {
-        setError("Failed to fetch documents.");
-        setLoading(false);
-      });
+    if (user) {
+      axios
+        .post<{ documents: Document[] }>(
+          `${process.env.REACT_APP_BACKEND_URI}/api/v1/authorized_documents`,
+          { users: user } 
+        )
+        .then((res) => {
+          setDocuments(res.data.documents);
+          setLoading(false);
+        })
+        .catch(() => {
+          setError("Failed to fetch documents.");
+          setLoading(false);
+        });
+    } else {
+      setError("No user found.");
+      setLoading(false);
+    }
   }, []);
+
+  // console.log(documents)
 
   if (loading) return <div className="flex justify-center items-center h-screen text-gray-500">Loading...</div>;
   if (error) return <div className="text-red-500 text-center p-4">{error}</div>;

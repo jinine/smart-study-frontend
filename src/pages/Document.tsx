@@ -3,6 +3,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import Header from "../components/Header";
 import QuillEditor from "../components/QuillEditor";
+import Modal from "../components/Modal";
+// import { Modal } from "@fluentui/react";
 
 export default function Dashboard() {
     const { uuid } = useParams();
@@ -11,6 +13,7 @@ export default function Dashboard() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const [value, setValue] = useState("");
+    const [share, setShare] = useState(false);
 
     useEffect(() => {
         if (!localStorage.getItem("token")) {
@@ -22,7 +25,7 @@ export default function Dashboard() {
         if (!uuid) return;
 
         setLoading(true);
-        axios.get(`http://localhost:8991/api/v1/document/${uuid}`)
+        axios.get(`${process.env.REACT_APP_BACKEND_URI}/api/v1/document/${uuid}`)
             .then((response) => {
                 setDocument(response.data.document);
                 setValue(response.data.document.content);
@@ -39,7 +42,7 @@ export default function Dashboard() {
         if (!document) return;
 
         try {
-            await axios.put(`http://localhost:8991/api/v1/documents/update_document/${uuid}`, {
+            await axios.put(`${process.env.REACT_APP_BACKEND_URI}/api/v1/documents/update_document/${uuid}`, {
                 access_type: document.access_type,
                 users: document.users,
                 content: value,
@@ -58,7 +61,7 @@ export default function Dashboard() {
         if (!confirmDelete) return;
 
         try {
-            await axios.delete(`http://localhost:8991/api/v1/documents/delete_document/${uuid}`);
+            await axios.delete(`${process.env.REACT_APP_BACKEND_URI}/api/v1/documents/delete_document/${uuid}`);
             alert("Document deleted successfully!");
             navigate("/");
         } catch (err) {
@@ -67,10 +70,20 @@ export default function Dashboard() {
         }
     };
 
+
+    const shareContent = () => {
+        <div className="text-black">
+            Sonmething is cool
+        </div>
+    }
+
     return (
         <div>
             <Header />
             <main className="p-8 lg:flex-col">
+                {share && (
+                    <Modal openClose={() => setShare(!share)} children={shareContent}></ Modal>
+                )}
                 {loading ? (
                     <p>Loading document...</p>
                 ) : error ? (
@@ -89,6 +102,9 @@ export default function Dashboard() {
                                 className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
                             >
                                 Delete
+                            </button>
+                            <button onClick={() => setShare(true)} className="">
+                                Share
                             </button>
                         </div>
                         <QuillEditor value={value} setValue={setValue} />

@@ -26,7 +26,7 @@ export default function Dashboard() {
         content: "new document",
       };
   
-      const response = await axios.post("http://localhost:8991/api/v1/documents/create_document", newDocument);
+      const response = await axios.post(`${process.env.REACT_APP_BACKEND_URI}/api/v1/documents/create_document`, newDocument);
       
       if (response.status === 201) {
         // setRefresh((prev) => !prev);

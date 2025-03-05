@@ -10,11 +10,11 @@ function Login() {
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     try {
-      const response = await axios.post("http://localhost:8991/api/v1/auth/login", {
+      const response = await axios.post(`${process.env.REACT_APP_BACKEND_URI}/api/v1/auth/login`, {
         email,
         password,
       });
-      console.log("Login successful:", response.data);
+      // console.log("Login successful:", response.data);
       localStorage.setItem("token", response.data.token);
       localStorage.setItem("user", response.data.email);
       navigate("/dashboard");

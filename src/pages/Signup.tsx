@@ -15,7 +15,7 @@ function Signup() {
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     try {
-      const response = await axios.post("http://localhost:8991/api/v1/user/create_user", {
+      const response = await axios.post(`${process.env.REACT_APP_BACKEND_URI}/api/v1/user/create_user`, {
         username,
         email,
         first_name: firstName,
