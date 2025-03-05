@@ -15,41 +15,66 @@ export default function DocumentList() {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [documentListType, setDocumentListType] = useState("personal");
   const user = localStorage.getItem("user");
   const backendUri = process.env.REACT_APP_BACKEND_URI;
-  
 
+  // Fetch documents based on user and documentListType
   useEffect(() => {
-    if (user) {
+    setLoading(true);
+    setError(null);
+
+    if (documentListType === "personal" && user) {
       axios
         .post<{ documents: Document[] }>(
-          `${process.env.REACT_APP_BACKEND_URI}/api/v1/authorized_documents`,
-          { users: user } 
+          `${backendUri}/api/v1/authorized_documents`,
+          { users: user }
         )
         .then((res) => {
           setDocuments(res.data.documents);
           setLoading(false);
         })
         .catch(() => {
-          setError("Failed to fetch documents.");
+          setError("Failed to fetch authorized documents.");
+          setLoading(false);
+        });
+    } else if (documentListType === "public") {
+      axios
+        .get<{ documents: Document[] }>(`${backendUri}/api/v1/documents`)
+        .then((res) => {
+          setDocuments(res.data.documents);
+          setLoading(false);
+        })
+        .catch(() => {
+          setError("Failed to fetch public documents.");
           setLoading(false);
         });
     } else {
       setError("No user found.");
       setLoading(false);
     }
-  }, []);
-
-  // console.log(documents)
+  }, [documentListType, user]);
 
   if (loading) return <div className="flex justify-center items-center h-screen text-gray-500">Loading...</div>;
   if (error) return <div className="text-red-500 text-center p-4">{error}</div>;
 
   return (
     <div className="w-full mx-auto p-8">
-      <h1 className="text-2xl font-semibold mb-4">My Documents</h1>
+      <div className="flex mb-4">
+        <button
+          onClick={() => setDocumentListType("personal")}
+          className={`text-2xl font-semibold mb-4 ${documentListType === "personal" ? 'underline' : 'text-blue-500'}`}
+        >
+          My Documents
+        </button>
+        <button
+          onClick={() => setDocumentListType("public")}
+          className={`text-2xl font-semibold mb-4 pl-4 ${documentListType === "public" ? 'underline' : 'text-blue-500'}`}
+        >
+          All Documents
+        </button>
+      </div>
 
-      {/* Documents Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
         {documents.length > 0 ? (
           documents.map((doc) => (
