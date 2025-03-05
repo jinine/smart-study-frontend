@@ -1,22 +1,41 @@
 import { useState } from "react";
 import ReactQuill from "react-quill";
-import "react-quill/dist/quill.snow.css"; // Import Quill styles
+import "react-quill/dist/quill.snow.css";
+import "react-quill/dist/quill.bubble.css"; // Optional: You can experiment with the 'bubble' theme for a cleaner look
 
 type Params = {
     value: any,
     setValue: any
 };
 
-export default function QuillEditor({value, setValue}: Params) {
+export default function QuillEditor({ value, setValue }: Params) {
+    const modules = {
+        toolbar: [
+            [{ 'header': '1' }, { 'header': '2' }, { 'font': [] }],
+            [{ 'align': [] }],
+            ['bold', 'italic', 'underline', 'strike'],
+            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+            ['blockquote', 'code-block'],
+            ['link', 'image'],
+            [{ 'color': [] }, { 'background': [] }],
+            ['clean']
+        ],
+    };
+
+    const formats = [
+        'header', 'font', 'align', 'bold', 'italic', 'underline', 'strike', 
+        'list', 'bullet', 'blockquote', 'code-block', 'link', 'image', 
+        'color', 'background', 'clean'
+    ];
 
     return (
-        <div className="w-full p-4 bg-white rounded-lg">
             <ReactQuill
                 value={value}
                 onChange={setValue}
-                className="h-[75vh]"
                 theme="snow"
+                className="rounded-lg border border-gray-300"
+                modules={modules}
+                formats={formats}
             />
-        </div>
     );
 }

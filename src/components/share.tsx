@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
 
 const Share = ({ documentUuid }: { documentUuid: any }) => {
@@ -7,6 +7,28 @@ const Share = ({ documentUuid }: { documentUuid: any }) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState(false);
+
+    useEffect(() => {
+        const fetchDocumentData = async () => {
+            setLoading(true);
+            try {
+                const response = await axios.get(
+                    `${process.env.REACT_APP_BACKEND_URI}/api/v1/document/${documentUuid}`
+                );
+                const document = response.data.document;
+                setAccessType(document.access_type);
+                const cleansedUsers = document.users.replace(/[{}"]/g, "").split(",").map((user:any) => user.trim());
+                setUsers(cleansedUsers.join(', '));
+
+            } catch (err) {
+                setError('Failed to fetch document data.');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchDocumentData();
+    }, [documentUuid]);
 
     const handleSubmit = async () => {
         setLoading(true);
@@ -18,7 +40,7 @@ const Share = ({ documentUuid }: { documentUuid: any }) => {
                 `${process.env.REACT_APP_BACKEND_URI}/api/v1/documents/update_document/${documentUuid}`,
                 {
                     access_type: accessType,
-                    users: users.split(','),
+                    users: users,
                 }
             );
 
@@ -31,6 +53,12 @@ const Share = ({ documentUuid }: { documentUuid: any }) => {
             setLoading(false);
         }
     };
+
+    const handleUserChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setUsers(e.target.value);
+    };
+
+
 
     return (
         <div className="max-w-lg mx-auto p-6 bg-white rounded-lg shadow-lg">
@@ -66,11 +94,24 @@ const Share = ({ documentUuid }: { documentUuid: any }) => {
             </div>
 
             <div className="mb-4">
-                <label className="block text-gray-700 font-medium mb-2">Users (comma separated):</label>
+                <label className="block text-gray-700 font-medium mb-2">Users with Access:</label>
+                <ul className="list-disc pl-5">
+                    {users ? (
+                        users.split(',').map((user, index) => (
+                            <li key={index} className="text-gray-700">{user.trim()}</li>
+                        ))
+                    ) : (
+                        <li>No users have access to this document.</li>
+                    )}
+                </ul>
+            </div>
+
+            <div className="mb-4">
+                <label className="block text-gray-700 font-medium mb-2">Add Users (comma separated):</label>
                 <input
                     type="text"
                     value={users}
-                    onChange={(e) => setUsers(e.target.value)}
+                    onChange={handleUserChange}
                     placeholder="Enter users (comma separated)"
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
