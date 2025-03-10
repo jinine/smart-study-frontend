@@ -60,7 +60,7 @@ export default function DocumentList() {
     fetchDocuments();
 
     // Set an interval to refresh documents every 30 seconds
-    const intervalId = setInterval(fetchDocuments, 30000); // 30 seconds
+    const intervalId = setInterval(fetchDocuments, 600000); // 30 seconds
 
     // Cleanup the interval on component unmount
     return () => clearInterval(intervalId);
@@ -70,17 +70,17 @@ export default function DocumentList() {
   if (error) return <div className="text-red-500 text-center p-4">{error}</div>;
 
   return (
-    <div className="w-full mx-auto p-8">
+    <div className="w-full mx-auto p-8 bg-black text-white">
       <div className="flex mb-4">
         <button
           onClick={() => setDocumentListType("personal")}
-          className={`text-2xl font-semibold mb-4 ${documentListType === "personal" ? 'underline' : 'text-blue-500'}`}
+          className={`text-2xl font-semibold mb-4 ${documentListType === "personal" ? 'underline text-white' : 'text-blue-500'}`}
         >
           My Documents
         </button>
         <button
           onClick={() => setDocumentListType("public")}
-          className={`text-2xl font-semibold mb-4 pl-4 ${documentListType === "public" ? 'underline' : 'text-blue-500'}`}
+          className={`text-2xl font-semibold mb-4 pl-4 ${documentListType === "public" ? 'underline text-white' : 'text-blue-500'}`}
         >
           All Documents
         </button>
@@ -92,30 +92,30 @@ export default function DocumentList() {
             <Link
               to={`/document/${doc.uuid}`}
               key={doc.uuid}
-              className="group flex flex-col p-4 border rounded-lg shadow hover:shadow-lg transition cursor-pointer bg-white overflow-hidden"
+              className="group flex flex-col p-4 border border-gray-700 rounded-lg shadow-lg hover:shadow-xl transition-all cursor-pointer bg-gray-900 overflow-hidden"
             >
               {/* Icon and Header */}
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2 text-white">
                 <DocumentText20Regular className="text-blue-500" />
-                <h3 className="font-semibold text-gray-800 truncate w-full">{doc.uuid}</h3>
+                <h3 className="font-semibold text-white truncate w-full">{doc.uuid}</h3>
               </div>
 
               {/* Date */}
-              <p className="text-sm text-gray-500">{new Date(doc.modified_date).toLocaleString()}</p>
+              <p className="text-sm text-gray-400">{new Date(doc.modified_date).toLocaleString()}</p>
 
               {/* Content (Prevents Overflow) */}
-              <div className="mt-2 p-2 border rounded bg-gray-100 text-sm text-gray-700 w-full max-h-32 overflow-auto">
+              <div className="mt-2 p-2 border rounded bg-gray-800 text-sm text-gray-400 w-full max-h-32 overflow-auto">
                 {doc.content || "No content available"}
               </div>
 
               {/* Access Type */}
-              <div className="mt-2 text-sm font-medium">
+              <div className="mt-2 text-sm font-medium text-white">
                 {doc.access_type === "public" ? (
-                  <span className="flex items-center text-green-600">
+                  <span className="flex items-center text-green-500">
                     <Globe20Regular className="mr-1" /> Public
                   </span>
                 ) : (
-                  <span className="flex items-center text-red-600">
+                  <span className="flex items-center text-red-500">
                     <LockClosed20Regular className="mr-1" /> Restricted
                   </span>
                 )}
