@@ -8,6 +8,7 @@ import Dashboard from './pages/Dashboard';
 import Document from './pages/Document';
 import NotFound from './pages/404';
 import CueCard from './pages/CueCard';
+import ManageCueCards from './pages/ManageCueCards';
 
 function App() {
   return (
@@ -18,7 +19,8 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path='/document/:uuid' element={<Document />} />
-        <Route path='/cue-card/:uuid' element={<CueCard />} />
+        <Route path='/cue-card/:group_uuid' element={<CueCard />} />
+        <Route path='/cue-card' element={<ManageCueCards />} />
         <Route path='*' element={<NotFound />} />
       </Routes>
     </Router>

@@ -20,6 +20,9 @@ export default function Dashboard() {
     const [share, setShare] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [autoSaveEnabled, setAutoSaveEnabled] = useState(false);
+    const user = localStorage.getItem("user");
+    const [title, setTitle] = useState("");
+    const [cuecardmodal, setcuecardmodal] = useState(false);
 
     useEffect(() => {
         if (!localStorage.getItem("token")) {
@@ -35,6 +38,9 @@ export default function Dashboard() {
             .then((response) => {
                 setDocument(response.data.document);
                 setValue(response.data.document.content);
+                if (!response.data.document.users.includes(user)) {
+                    navigate("/dashboard");
+                }
                 setError("");
             })
             .catch((err) => {
@@ -57,7 +63,6 @@ export default function Dashboard() {
             };
         }
     }, [uuid]);
-
 
     const handleChange = (newContent: string) => {
         setValue(newContent);
@@ -107,7 +112,7 @@ export default function Dashboard() {
         try {
             await axios.delete(`${process.env.REACT_APP_BACKEND_URI}/api/v1/documents/delete_document/${uuid}`);
             alert("Document deleted successfully!");
-            navigate("/");
+            navigate("/dashboard");
         } catch (err) {
             console.error("Error deleting document:", err);
             alert("Failed to delete document.");
@@ -120,44 +125,61 @@ export default function Dashboard() {
         );
     };
 
+    const handletitlechange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setTitle(e.target.value);
+    };
+
+    const generateCueCardContent = () => {
+        return (
+            <div className="flex flex-col space-y-4">
+                <input
+                    type="text"
+                    placeholder="Enter cue card title"
+                    className="px-4 py-2 bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    value={title}
+                    onChange={handletitlechange}
+                />
+                <button
+                    className="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition"
+                    onClick={generateCueCards}
+                >
+                    Generate
+                </button>
+            </div>
+        );
+    };
 
     const generateCueCards = async () => {
         if (!value) return alert("Document is empty!");
 
-        console.log(value)
         try {
             const response = await axios.post(
-                `${process.env.REACT_APP_BACKEND_URI}/api/v1/generate-cue-cards`, 
-                { text: value }
+                `${process.env.REACT_APP_BACKEND_URI}/api/v1/generate-cue-cards`,
+                {
+                    text: value, users: user, title: title
+                }
             );
-    
-            const cueCards = response.data;
-            console.log("Generated Cue Cards:", cueCards);
-    
-            // const jsonData = JSON.stringify(cueCards, null, 2);
-            // const blob = new Blob([jsonData], { type: "application/json" });
-            // const url = URL.createObjectURL(blob);
-            // const a = document.createElement("a");
-            // a.href = url;
-            // a.download = "cue_cards.json";
-            // a.click();
-            // URL.revokeObjectURL(url);
+            if (response.status === 201) {
+                setcuecardmodal(false);
+            }
         } catch (error) {
             console.error("Error generating cue cards:", error);
             alert("Failed to generate cue cards.");
         }
     };
-    
 
     return (
-        <div>
+        <div className="bg-gray-900 min-h-screen text-white">
             <Header />
             <main className="p-8 lg:flex-col">
                 {share && (
                     <Modal openClose={() => setShare(!share)}>{shareContent()}</Modal>
                 )}
+                {cuecardmodal && (
+                    <Modal openClose={() => setcuecardmodal(!cuecardmodal)}>{generateCueCardContent()}</Modal>
+                )}
                 {loading ? (
-                    <p>Loading document...</p>
+                    <p className="text-gray-400">Loading document...</p>
                 ) : error ? (
                     <p className="text-red-600">{error}</p>
                 ) : (
@@ -176,23 +198,23 @@ export default function Dashboard() {
                                 Delete
                             </button>
                             <button
-                                onClick={generateCueCards}
+                                onClick={() => setcuecardmodal(true)}
                                 className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
                             >
                                 Generate Cue Cards
                             </button>
-                            <button onClick={() => setShare(true)} className="">
+                            <button onClick={() => setShare(true)} className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-800 transition">
                                 Share
                             </button>
                         </div>
 
                         <div className="flex items-center gap-2 mb-4">
-                            <label className="text-gray-700">Enable Auto-save</label>
+                            <label className="text-gray-300">Enable Auto-save</label>
                             <input
                                 type="checkbox"
                                 checked={autoSaveEnabled}
                                 onChange={() => setAutoSaveEnabled(!autoSaveEnabled)}
-                                className="h-5 w-5"
+                                className="h-5 w-5 bg-gray-700"
                             />
                         </div>
 
