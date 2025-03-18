@@ -38,7 +38,7 @@ export default function Dashboard() {
             .then((response) => {
                 setDocument(response.data.document);
                 setValue(response.data.document.content);
-                if (!response.data.document.users.includes(user)) {
+                if (!response.data.document.users.includes(user) && response.data.document.access_type !== "public") {
                     navigate("/dashboard");
                 }
                 setError("");
