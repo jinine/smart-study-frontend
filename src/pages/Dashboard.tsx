@@ -19,6 +19,8 @@ export default function Dashboard() {
   const user = localStorage.getItem("user");
   const [cueCards, setCueCards] = useState<CueCard[]>([]);
 
+  console.log(process.env.REACT_APP_BACKEND_URI)
+
   useEffect(() => {
     if (!isLoggedIn) {
       navigate("/");
