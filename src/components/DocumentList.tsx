@@ -70,7 +70,7 @@ export default function DocumentList() {
   if (error) return <div className="text-red-500 text-center p-4">{error}</div>;
 
   return (
-    <div className="w-full mx-auto p-8 bg-black text-white">
+    <div className="w-full mx-auto p-8 text-white">
       <div className="flex mb-4">
         <button
           onClick={() => setDocumentListType("personal")}
