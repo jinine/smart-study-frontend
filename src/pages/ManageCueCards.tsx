@@ -33,7 +33,7 @@ const ManageCueCards = () => {
         group_uuid: group_uuid || '',
     });
     const [loading, setLoading] = useState(false);
-    // const [newGroupName, setNewGroupName] = useState<string>('');
+    const [editingCueCard, setEditingCueCard] = useState<CueCard | null>(null);
 
     useEffect(() => {
         fetchCueCards();
@@ -70,13 +70,6 @@ const ManageCueCards = () => {
         }
     };
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        setNewCueCard({
-            ...newCueCard,
-            [e.target.name]: e.target.value,
-        });
-    };
-
     const handleGroupChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
         const selectedGroup: any = groups.find((group: any) => group.group_uuid === event.target.value);
         if (selectedGroup) {
@@ -88,12 +81,26 @@ const ManageCueCards = () => {
         }
     };
 
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        if (editingCueCard) {
+            setEditingCueCard({
+                ...editingCueCard,
+                [e.target.name]: e.target.value,
+            });
+        } else {
+            setNewCueCard({
+                ...newCueCard,
+                [e.target.name]: e.target.value,
+            });
+        }
+    };
+
     const handleCreateCueCard = async () => {
         setLoading(true);
         try {
             await axios.post(`${process.env.REACT_APP_BACKEND_URI}/api/v1/cue-cards`, newCueCard);
             fetchCueCards();
-            
             setNewCueCard({
                 title: '',
                 question: '',
@@ -108,16 +115,17 @@ const ManageCueCards = () => {
             setLoading(false);
         }
     };
-    
 
-    const handleEditCueCard = async (id: number, updatedData: any) => {
+    const handleEditCueCard = async () => {
+        if (!editingCueCard) return;
         setLoading(true);
         try {
             await axios.put(
-                `${process.env.REACT_APP_BACKEND_URI}/api/v1/cue-cards/${id}`,
-                updatedData
+                `${process.env.REACT_APP_BACKEND_URI}/api/v1/cue-cards/${editingCueCard.id}`,
+                editingCueCard
             );
-            fetchCueCards(); // Refresh the list after updating the cue card
+            fetchCueCards();
+            setEditingCueCard(null);
         } catch (error) {
             console.error('Error updating cue card', error);
         } finally {
@@ -129,7 +137,7 @@ const ManageCueCards = () => {
         setLoading(true);
         try {
             await axios.delete(`${process.env.REACT_APP_BACKEND_URI}/api/v1/cue-cards/${id}`);
-            fetchCueCards(); // Refresh the list after deleting the cue card
+            fetchCueCards();
         } catch (error) {
             console.error('Error deleting cue card', error);
         } finally {
@@ -137,22 +145,13 @@ const ManageCueCards = () => {
         }
     };
 
-    const sortedCueCards = cueCards.sort((a, b) => {
-        if (a.title === b.title) {
-            return a.group_uuid.localeCompare(b.group_uuid);
-        }
-        return a.title.localeCompare(b.title);
-    });
-
     return (
         <div className="min-h-screen bg-gray-900 text-white p-8">
             <Header />
             <h1 className="text-3xl font-bold text-center mb-8">Manage Your Cue Cards</h1>
-
-
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                {/* Add New Cue Card Section */}
-                <div className="bg-gray-800 p-6 rounded-lg shadow-lg">
+                                {/* Add New Cue Card Section */}
+                                <div className="bg-gray-800 p-6 rounded-lg shadow-lg">
                     <h3 className="text-lg font-semibold text-gray-200 mb-2">New Cue Card</h3>
 
                     {/* Group Selection */}
@@ -217,32 +216,57 @@ const ManageCueCards = () => {
                 {loading ? (
                     <div className="text-center text-lg">Loading...</div>
                 ) : (
-                    sortedCueCards.map((cueCard) => (
+                    cueCards.map((cueCard) => (
                         <div key={cueCard.id} className="bg-gray-800 p-6 rounded-lg shadow-lg">
-                            <h3 className="text-xl font-semibold text-gray-200 mb-4">{cueCard.title}</h3>
-                            <p className="text-gray-400 mb-4">Question: {cueCard.question}</p>
-                            <p className="text-gray-400 mb-4">Answer: {cueCard.answer}</p>
-                            <p className="text-gray-400 mb-4">Access Type: {cueCard.access_type}</p>
-                            <div className="flex gap-4">
-                                <button
-                                    onClick={() =>
-                                        handleEditCueCard(cueCard.id, {
-                                            title: cueCard.title,
-                                            question: cueCard.question,
-                                            answer: cueCard.answer,
-                                        })
-                                    }
-                                    className="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition"
-                                >
-                                    Edit
-                                </button>
-                                <button
-                                    onClick={() => handleDeleteCueCard(cueCard.id)}
-                                    className="bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 transition"
-                                >
-                                    Delete
-                                </button>
-                            </div>
+                            {editingCueCard?.id === cueCard.id ? (
+                                <>
+                                    <input
+                                        type="text"
+                                        name="title"
+                                        value={editingCueCard.title}
+                                        onChange={handleInputChange}
+                                        className="w-full p-2 bg-gray-700 text-gray-200 rounded-md text-sm mb-2"
+                                    />
+                                    <textarea
+                                        name="question"
+                                        value={editingCueCard.question}
+                                        onChange={handleInputChange}
+                                        className="w-full p-2 bg-gray-700 text-gray-200 rounded-md text-sm mb-2"
+                                    />
+                                    <textarea
+                                        name="answer"
+                                        value={editingCueCard.answer}
+                                        onChange={handleInputChange}
+                                        className="w-full p-2 bg-gray-700 text-gray-200 rounded-md text-sm mb-2"
+                                    />
+                                    <button
+                                        onClick={handleEditCueCard}
+                                        className="bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition"
+                                    >
+                                        Save
+                                    </button>
+                                </>
+                            ) : (
+                                <>
+                                    <h3 className="text-xl font-semibold text-gray-200 mb-4">{cueCard.title}</h3>
+                                    <p className="text-gray-400 mb-4">Question: {cueCard.question}</p>
+                                    <p className="text-gray-400 mb-4">Answer: {cueCard.answer}</p>
+                                    <div className="flex gap-4">
+                                        <button
+                                            onClick={() => setEditingCueCard(cueCard)}
+                                            className="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition"
+                                        >
+                                            Edit
+                                        </button>
+                                        <button
+                                            onClick={() => handleDeleteCueCard(cueCard.id)}
+                                            className="bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 transition"
+                                        >
+                                            Delete
+                                        </button>
+                                    </div>
+                                </>
+                            )}
                         </div>
                     ))
                 )}
