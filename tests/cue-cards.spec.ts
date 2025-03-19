@@ -1,7 +1,6 @@
 import { test, expect } from '@playwright/test';
 
 test('should login and interact with document component', async ({ page }) => {
-    const backendUri = "http://localhost:4000";
 
     // Step 1: Navigate to login page
     await page.goto("http://localhost:3000/login");
