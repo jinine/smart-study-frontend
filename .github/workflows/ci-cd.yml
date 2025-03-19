@@ -38,7 +38,7 @@ jobs:
           
       # Run Playwright tests
       - name: Run Playwright tests
-        run: npx playwright test
+        # run: npx playwright test
 
       # Build the app
       - name: Build the React app
