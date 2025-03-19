@@ -27,23 +27,18 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Install Playwright
-        run: npx playwright install 
+     # - name: Install Playwright
+     #   run: npx playwright install 
 
           # Run Playwright tests (ensure app is running locally)
-      - name: Start the app
-        run: |
-          npm start &
-          sleep 5  # Wait for the app to start up
+      # - name: Start the app
+      #  run: |
+      #    npm start &
+      #    sleep 5  # Wait for the app to start up
           
       # Run Playwright tests
       # - name: Run Playwright tests
       #   run: npx playwright test
-
-      # Build the app (allow warnings to pass)
-      - name: Build the React app (with warning bypass)
-        run: |
-          CI=false npm run build || echo "Build succeeded with warnings, continuing deployment..."
 
   deploy:
     runs-on: ubuntu-latest
@@ -61,13 +56,20 @@ jobs:
 
       # Deploy to DigitalOcean Droplet using password authentication
       - name: Deploy to DigitalOcean Droplet
-        run: |
-          sshpass -p "${{ secrets.DROPLET_PASSWORD }}" scp -r ./build/* root@164.90.144.250:/../var/www/smart-study-frontend
+        run:  |
+          # Copy repository to the server
+          sshpass -p "${{ secrets.DROPLET_PASSWORD }}" scp -r ./ root@164.90.144.250:/var/www/smart-study-frontend
+
+          # SSH into the server to build and deploy
           sshpass -p "${{ secrets.DROPLET_PASSWORD }}" ssh root@164.90.144.250 << 'EOF'
             # Navigate to the app directory
-            cd /../var/www/smart-study-frontend
+            cd /var/www/smart-study-frontend
 
-            npm run build
+            # Install dependencies
+            npm install
+
+            # Build the React app
+            CI=false npm run build
 
             # Stop the current PM2 process
             pm2 stop smart-study-frontend
@@ -81,5 +83,3 @@ jobs:
           EOF
         env:
           DROPLET_PASSWORD: ${{ secrets.DROPLET_PASSWORD }}
-
-  # Optional: Clean-up or run any additional tasks
