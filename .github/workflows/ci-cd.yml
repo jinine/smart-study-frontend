@@ -37,8 +37,8 @@ jobs:
           sleep 5  # Wait for the app to start up
           
       # Run Playwright tests
-      - name: Run Playwright tests
-        # run: npx playwright test
+      # - name: Run Playwright tests
+      #   run: npx playwright test
 
       # Build the app
       - name: Build the React app
