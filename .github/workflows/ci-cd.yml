@@ -27,11 +27,18 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      # - name: Install Playwright
-      #   run: npx playwright install 
-      # # Run Playwright tests
-      # - name: Run Playwright tests
-      #   run: npx playwright test
+      - name: Install Playwright
+        run: npx playwright install 
+
+          # Run Playwright tests (ensure app is running locally)
+      - name: Start the app
+        run: |
+          npm start &
+          sleep 5  # Wait for the app to start up
+          
+      # Run Playwright tests
+      - name: Run Playwright tests
+        run: npx playwright test
 
       # Build the app
       - name: Build the React app
