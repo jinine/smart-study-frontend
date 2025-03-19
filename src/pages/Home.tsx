@@ -9,8 +9,8 @@ export default function Home() {
       <Header />
 
       {/* Hero Section */}
-      <section className="text-center py-24 px-6 flex-1 flex flex-col justify-center">
-        <h2 className="text-5xl font-extrabold mb-4 text-white">
+      <section id="hero" className="text-center py-24 px-6 flex-1 flex flex-col justify-center">
+        <h2 id="organize-notes"className="text-5xl font-extrabold mb-4 text-white">
           Organize Your Notes, Supercharge Your Study
         </h2>
         <p className="text-lg text-gray-300 max-w-2xl mx-auto mb-6">

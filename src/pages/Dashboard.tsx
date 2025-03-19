@@ -71,6 +71,7 @@ export default function Dashboard() {
         <div className="flex justify-center">
           <button
             onClick={handleCreateDocument}
+            id="new-document"
             className="w-40 h-40 bg-gradient-to-br from-blue-400 to-blue-600 text-white flex justify-center items-center rounded-2xl shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 relative overflow-hidden"
           >
             <span className="text-5xl font-bold">+</span>
@@ -84,7 +85,7 @@ export default function Dashboard() {
         <div className="w-full mt-8">
           <div className="flex justify-between items-center">
             <h2 className="text-2xl font-semibold mb-4">Browse Cue Cards</h2>
-            <button className="text-sm text-blue-400 hover:underline" onClick={()=>navigate('/cue-card')}>Manage Cue Cards</button>
+            <button id="manage-cue-cards" className="text-sm text-blue-400 hover:underline" onClick={()=>navigate('/cue-card')}>Manage Cue Cards</button>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

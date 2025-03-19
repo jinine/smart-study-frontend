@@ -6,7 +6,9 @@ import Header from "../components/Header";
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null); // State to hold the error message
   const navigate = useNavigate();
+
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     try {
@@ -18,9 +20,14 @@ function Login() {
       localStorage.setItem("token", response.data.token);
       localStorage.setItem("user", response.data.email);
       navigate("/dashboard");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Login error:", error);
-      // Handle login error (e.g., show error message)
+      // Display the error message if login fails
+      if (error.response && error.response.data) {
+        setError(error.response.data.message || "Login failed. Please try again.");
+      } else {
+        setError("An error occurred. Please try again later.");
+      }
     }
   };
 
@@ -33,6 +40,11 @@ function Login() {
           onSubmit={handleSubmit}
         >
           <h2 className="text-3xl font-semibold text-white mb-6">Login</h2>
+          {error && (
+            <div className="text-red-500 text-sm mb-4">
+              Login error
+            </div>
+          )}
           <div className="mb-6">
             <label
               className="block text-sm font-medium text-gray-300"

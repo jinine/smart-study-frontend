@@ -6,7 +6,7 @@ export default function Header() {
   const navigate = useNavigate();
 
   return (
-    <nav className="bg-gray-900 shadow-md p-4">
+    <header className="bg-gray-900 shadow-md p-4">
       <div className="max-w-7xl mx-auto flex justify-between items-center">
         
         {/* Logo / Home Link */}
@@ -44,6 +44,6 @@ export default function Header() {
           )}
         </div>
       </div>
-    </nav>
+    </header>
   );
 }
