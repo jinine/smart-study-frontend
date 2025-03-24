@@ -9,6 +9,8 @@ import Document from './pages/Document';
 import NotFound from './pages/404';
 import CueCard from './pages/CueCard';
 import ManageCueCards from './pages/ManageCueCards';
+import Scheduler from './pages/Scheduler';
+import Profile from './pages/Profile';
 
 function App() {
   return (
@@ -21,6 +23,8 @@ function App() {
         <Route path='/document/:uuid' element={<Document />} />
         <Route path='/cue-card/:group_uuid' element={<CueCard />} />
         <Route path='/cue-card' element={<ManageCueCards />} />
+        <Route path='/schedule' element={<Scheduler />} />
+        <Route path='/profile' element={<Profile />} />
         <Route path='*' element={<NotFound />} />
       </Routes>
     </Router>

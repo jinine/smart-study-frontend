@@ -10,7 +10,7 @@ import { io } from "socket.io-client";
 // Create a socket connection
 const socket = io(process.env.REACT_APP_BACKEND_URI);
 
-export default function Dashboard() {
+export default function Document() {
     const { uuid } = useParams();
     const navigate = useNavigate();
     const [document, setDocument] = useState<any>(null);
@@ -23,12 +23,10 @@ export default function Dashboard() {
     const user = localStorage.getItem("user");
     const [title, setTitle] = useState("");
     const [cuecardmodal, setcuecardmodal] = useState(false);
-
-    useEffect(() => {
-        if (!localStorage.getItem("token")) {
-            navigate("/");
-        }
-    }, [navigate]);
+    const [isCheckingGrammar, setIsCheckingGrammar] = useState(false);
+    // const [rewrittenText, setRewrittenText] = useState("");
+    const [tone, setTone] = useState("professional");
+    const [connectedUsers, setConnectedUsers] = useState<string[]>([]);
 
     useEffect(() => {
         if (!uuid) return;
@@ -58,11 +56,48 @@ export default function Dashboard() {
                 }
             });
 
+            socket.on("user-connected", (userId) => {
+                setConnectedUsers((prevUsers) => [...prevUsers, userId]);
+            });
+
+            socket.on("user-disconnected", (userId) => {
+                setConnectedUsers((prevUsers) => prevUsers.filter((user) => user !== userId));
+            });
+
             return () => {
                 socket.off("document-update");
+                socket.off("user-connected");
+                socket.off("user-disconnected");
             };
         }
     }, [uuid]);
+
+    useEffect(() => {
+        if (!uuid || !user) return;
+
+        socket.emit("join-document", uuid, user);
+
+        // Listen for updates when users join/leave
+        socket.on("user-list", (users: string[]) => {
+            setConnectedUsers(users);
+        });
+
+        return () => {
+            socket.off("user-list");
+            socket.emit("leave-document", uuid, user);
+        };
+    }, [uuid, user]);
+
+
+    useEffect(() => {
+        if (uuid && user) {
+            socket.emit("user-connected", user);
+
+            return () => {
+                socket.emit("user-disconnected", user);
+            };
+        }
+    }, [uuid, user]);
 
     const handleChange = (newContent: string) => {
         setValue(newContent);
@@ -168,6 +203,73 @@ export default function Dashboard() {
         }
     };
 
+
+    const handleGrammarCheck = async () => {
+        if (!value) return alert("Document is empty!");
+
+        setIsCheckingGrammar(true);
+        try {
+            const response = await axios.post(
+                `${process.env.REACT_APP_BACKEND_URI}/api/v1/ai/grammar-check`,
+                { text: value }
+            );
+
+            if (!response.data || !response.data.data) {
+                alert("No changes suggested.");
+                return;
+            }
+            const cleanedResponse = response.data.data.replace(/```json|```/g, "").trim();
+
+            const result = JSON.parse(cleanedResponse);
+            const previousText = result["previous-text"];
+            const correctedText = result["new-text"];
+
+            if (previousText === correctedText) {
+                alert("No grammar mistakes found.");
+                return;
+            }
+
+            const applyChanges = window.confirm(
+                "Grammar suggestions found. Do you want to apply the changes?"
+            );
+
+            if (applyChanges) {
+                setValue(correctedText);
+                alert("Grammar corrections applied!");
+            }
+        } catch (error) {
+            console.error("Error checking grammar:", error);
+            alert("Failed to check grammar.");
+        } finally {
+            setIsCheckingGrammar(false);
+        }
+    };
+
+    const handleRewrite = async () => {
+        if (!value) return alert("Document is empty!");
+
+        try {
+            const response = await axios.post(`${process.env.REACT_APP_BACKEND_URI}/api/v1/ai/rewrite`, {
+                text: value,
+                tone: tone,
+            });
+
+            if (response.data && response.data.data) {
+                const cleanedResponse = response.data.data.replace(/```json|```/g, "").trim();
+                const result = JSON.parse(cleanedResponse);
+                const rewrite = result["rewrite"];
+                setValue(rewrite);
+                alert("Text rewritten successfully!");
+            } else {
+                alert("No rewritten text returned.");
+            }
+        } catch (error) {
+            console.error("Error rewriting text:", error);
+            alert("Failed to rewrite text.");
+        }
+    };
+
+
     return (
         <div className="bg-gray-900 min-h-screen text-white">
             <Header />
@@ -187,36 +289,80 @@ export default function Dashboard() {
                         <div className="flex gap-4 mb-4">
                             <button
                                 onClick={handleSave}
-                                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                                className="px-4 py-2 bg-indigo-700 text-white rounded-lg hover:bg-indigo-800 focus:outline-none transition duration-300 ease-in-out"
                             >
                                 Save
                             </button>
                             <button
                                 onClick={handleDelete}
-                                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
+                                className="px-4 py-2 bg-red-700 text-white rounded-lg hover:bg-red-800 focus:outline-none transition duration-300 ease-in-out"
                             >
                                 Delete
                             </button>
                             <button
                                 onClick={() => setcuecardmodal(true)}
-                                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+                                className="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 focus:outline-none transition duration-300 ease-in-out"
                             >
                                 Generate Cue Cards
                             </button>
-                            <button onClick={() => setShare(true)} className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-800 transition">
+                            <button
+                                onClick={handleGrammarCheck}
+                                className="px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 focus:outline-none transition duration-300 ease-in-out"
+                                disabled={isCheckingGrammar}
+                            >
+                                {isCheckingGrammar ? "Checking..." : "Check Grammar"}
+                            </button>
+
+                            <button
+                                onClick={() => setShare(true)}
+                                className="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-900 focus:outline-none transition duration-300 ease-in-out"
+                            >
                                 Share
                             </button>
                         </div>
 
-                        <div className="flex items-center gap-2 mb-4">
+                        <div className="flex items-center gap-4 mb-4">
+                            <label className="text-gray-300">Select Tone</label>
+                            <select
+                                value={tone}
+                                onChange={(e) => setTone(e.target.value)}
+                                className="bg-gray-800 text-white border border-gray-600 rounded-md px-4 py-2 focus:ring-2 focus:ring-indigo-600 focus:outline-none"
+                            >
+                                <option value="professional">Professional</option>
+                                <option value="casual">Casual</option>
+                                <option value="friendly">Friendly</option>
+                                <option value="formal">Formal</option>
+                            </select>
+                            <button
+                                onClick={handleRewrite}
+                                className="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 focus:outline-none transition duration-300 ease-in-out"
+                            >
+                                Rewrite Text
+                            </button>
+                        </div>
+
+                        <div className="flex items-center gap-4 mb-4">
                             <label className="text-gray-300">Enable Auto-save</label>
                             <input
                                 type="checkbox"
                                 checked={autoSaveEnabled}
                                 onChange={() => setAutoSaveEnabled(!autoSaveEnabled)}
-                                className="h-5 w-5 bg-gray-700"
+                                className="h-5 w-5 bg-gray-700 border-gray-600 rounded-md focus:ring-2 focus:ring-indigo-600"
                             />
                         </div>
+
+                        <div className="mt-4 p-4 bg-gray-800 rounded-md">
+                            <h3 className="text-lg font-semibold">Users in this document:</h3>
+                            <ul className="list-disc list-inside">
+                                {connectedUsers.length > 0 ? (
+                                    connectedUsers.map((u, index) => <li key={index}>{u}</li>)
+                                ) : (
+                                    <li>No active users</li>
+                                )}
+                            </ul>
+                        </div>
+
+
 
                         {isSaving && (
                             <div className="text-green-500 text-center mb-4">Auto-saving...</div>
