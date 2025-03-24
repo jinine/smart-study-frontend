@@ -10,7 +10,7 @@ import { io } from "socket.io-client";
 // Create a socket connection
 const socket = io(process.env.REACT_APP_BACKEND_URI);
 
-export default function Dashboard() {
+export default function Document() {
     const { uuid } = useParams();
     const navigate = useNavigate();
     const [document, setDocument] = useState<any>(null);
