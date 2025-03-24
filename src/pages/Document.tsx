@@ -26,7 +26,7 @@ export default function Document() {
     const [isCheckingGrammar, setIsCheckingGrammar] = useState(false);
     // const [rewrittenText, setRewrittenText] = useState("");
     const [tone, setTone] = useState("professional");
-    const [connectedUsers, setConnectedUsers] = useState<string[]>([]);
+    // const [connectedUsers, setConnectedUsers] = useState<string[]>([]);
 
     useEffect(() => {
         if (!uuid) return;
@@ -315,7 +315,7 @@ export default function Document() {
                             />
                         </div>
 
-                        <div className="mt-4 p-4 bg-gray-800 rounded-md">
+                        {/* <div className="mt-4 p-4 bg-gray-800 rounded-md">
                             <h3 className="text-lg font-semibold">Users in this document:</h3>
                             <ul className="list-disc list-inside">
                                 {connectedUsers.length > 0 ? (
@@ -324,7 +324,7 @@ export default function Document() {
                                     <li>No active users</li>
                                 )}
                             </ul>
-                        </div>
+                        </div> */}
 
 
 
