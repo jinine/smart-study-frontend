@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
-import { PersonAdd24Regular, Person24Regular, SignOut24Regular, Home24Regular, ClipboardTask24Regular } from "@fluentui/react-icons";
+import { PersonAdd24Regular, Person24Regular, SignOut24Regular, Home24Regular, ClipboardTask24Regular, Person24Filled } from "@fluentui/react-icons";
 
 export default function Header() {
   const isLoggedIn = !!localStorage.getItem("token");
@@ -29,6 +29,9 @@ export default function Header() {
             <>
               <Link to="/dashboard" className="flex items-center text-white hover:text-blue-400 transition">
                 <ClipboardTask24Regular className="mr-1" /> Dashboard
+              </Link>
+              <Link to="/profile" className="flex items-center text-white hover:text-blue-400 transition">
+                <Person24Filled className="mr-1" /> Profile
               </Link>
               <button
                 onClick={() => {
