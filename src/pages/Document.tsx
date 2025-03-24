@@ -23,6 +23,8 @@ export default function Document() {
     const user = localStorage.getItem("user");
     const [title, setTitle] = useState("");
     const [cuecardmodal, setcuecardmodal] = useState(false);
+    const [isCheckingGrammar, setIsCheckingGrammar] = useState(false);
+    const [tone, setTone] = useState("professional");
 
     useEffect(() => {
         if (!localStorage.getItem("token")) {
@@ -168,6 +170,71 @@ export default function Document() {
         }
     };
 
+    const handleGrammarCheck = async () => {
+        if (!value) return alert("Document is empty!");
+
+        setIsCheckingGrammar(true);
+        try {
+            const response = await axios.post(
+                `${process.env.REACT_APP_BACKEND_URI}/api/v1/ai/grammar-check`,
+                { text: value }
+            );
+
+            if (!response.data || !response.data.data) {
+                alert("No changes suggested.");
+                return;
+            }
+            const cleanedResponse = response.data.data.replace(/```json|```/g, "").trim();
+
+            const result = JSON.parse(cleanedResponse);
+            const previousText = result["previous-text"];
+            const correctedText = result["new-text"];
+
+            if (previousText === correctedText) {
+                alert("No grammar mistakes found.");
+                return;
+            }
+
+            const applyChanges = window.confirm(
+                "Grammar suggestions found. Do you want to apply the changes?"
+            );
+
+            if (applyChanges) {
+                setValue(correctedText);
+                alert("Grammar corrections applied!");
+            }
+        } catch (error) {
+            console.error("Error checking grammar:", error);
+            alert("Failed to check grammar.");
+        } finally {
+            setIsCheckingGrammar(false);
+        }
+    };
+
+    const handleRewrite = async () => {
+        if (!value) return alert("Document is empty!");
+
+        try {
+            const response = await axios.post(`${process.env.REACT_APP_BACKEND_URI}/api/v1/ai/rewrite`, {
+                text: value,
+                tone: tone,
+            });
+
+            if (response.data && response.data.data) {
+                const cleanedResponse = response.data.data.replace(/```json|```/g, "").trim();
+                const result = JSON.parse(cleanedResponse);
+                const rewrite = result["rewrite"];
+                setValue(rewrite);
+                alert("Text rewritten successfully!");
+            } else {
+                alert("No rewritten text returned.");
+            }
+        } catch (error) {
+            console.error("Error rewriting text:", error);
+            alert("Failed to rewrite text.");
+        }
+    };
+
     return (
         <div className="bg-gray-900 min-h-screen text-white">
             <Header />
@@ -203,8 +270,35 @@ export default function Document() {
                             >
                                 Generate Cue Cards
                             </button>
+                            <button
+                                onClick={handleGrammarCheck}
+                                className="px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 focus:outline-none transition duration-300 ease-in-out"
+                                disabled={isCheckingGrammar}
+                            >
+                                {isCheckingGrammar ? "Checking..." : "Check Grammar"}
+                            </button>
                             <button onClick={() => setShare(true)} className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-800 transition">
                                 Share
+                            </button>
+                        </div>
+
+                        <div className="flex items-center gap-4 mb-4">
+                            <label className="text-gray-300">Select Tone</label>
+                            <select
+                                value={tone}
+                                onChange={(e) => setTone(e.target.value)}
+                                className="bg-gray-800 text-white border border-gray-600 rounded-md px-4 py-2 focus:ring-2 focus:ring-indigo-600 focus:outline-none"
+                            >
+                                <option value="professional">Professional</option>
+                                <option value="casual">Casual</option>
+                                <option value="friendly">Friendly</option>
+                                <option value="formal">Formal</option>
+                            </select>
+                            <button
+                                onClick={handleRewrite}
+                                className="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 focus:outline-none transition duration-300 ease-in-out"
+                            >
+                                Rewrite Text
                             </button>
                         </div>
 
