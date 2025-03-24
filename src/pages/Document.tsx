@@ -56,53 +56,17 @@ export default function Document() {
                 }
             });
 
-            socket.on("user-connected", (userId) => {
-                setConnectedUsers((prevUsers) => [...prevUsers, userId]);
-            });
-
-            socket.on("user-disconnected", (userId) => {
-                setConnectedUsers((prevUsers) => prevUsers.filter((user) => user !== userId));
-            });
-
             return () => {
                 socket.off("document-update");
-                socket.off("user-connected");
-                socket.off("user-disconnected");
             };
         }
     }, [uuid]);
-
-    useEffect(() => {
-        if (!uuid || !user) return;
-
-        socket.emit("join-document", uuid, user);
-
-        // Listen for updates when users join/leave
-        socket.on("user-list", (users: string[]) => {
-            setConnectedUsers(users);
-        });
-
-        return () => {
-            socket.off("user-list");
-            socket.emit("leave-document", uuid, user);
-        };
-    }, [uuid, user]);
-
-
-    useEffect(() => {
-        if (uuid && user) {
-            socket.emit("user-connected", user);
-
-            return () => {
-                socket.emit("user-disconnected", user);
-            };
-        }
-    }, [uuid, user]);
 
     const handleChange = (newContent: string) => {
         setValue(newContent);
         socket.emit("document-change", uuid, newContent);
     };
+
 
     const handleSave = async () => {
         if (!document) return;
